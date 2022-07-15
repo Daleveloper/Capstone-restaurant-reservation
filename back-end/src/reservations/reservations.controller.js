@@ -1,5 +1,6 @@
 const service = require("./reservations.service");
 const hasProperties = require("../errors/hasProperties");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 const VALID_PROPERTIES = [
   "first_name",
@@ -34,10 +35,8 @@ const hasRequiredProperties = hasProperties("first_name",
   "people");
 
 async function list(req, res) {
-  const data = await moviesService.list(req.query.is_showing);
-  res.json({
-    data: [],
-  });
+  const data = await service.list();
+  res.json({ data });
 }
 
 async function create(req, res) {
@@ -49,6 +48,6 @@ async function create(req, res) {
 
 
 module.exports = {
-  create: [hasOnlyValidProperties, hasRequiredProperties, create],
-  list,
+  create: [hasOnlyValidProperties, hasRequiredProperties, asyncErrorBoundary(create)],
+  list: asyncErrorBoundary(list),
 };
