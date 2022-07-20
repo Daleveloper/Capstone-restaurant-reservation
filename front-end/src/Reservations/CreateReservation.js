@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { createReservations } from "../utils/api";
 import { Link, useHistory } from "react-router-dom";
+import ErrorAlert from "../layout/ErrorAlert";
+
 
 
 
@@ -14,6 +16,7 @@ const initialFormState = {
 };
 
 function CreateReservation() {
+    const [reservationsError, setReservationsError] = useState(null);
     const [formData, setFormData] = useState({ ...initialFormState });
     const history = useHistory();
 
@@ -25,17 +28,18 @@ function CreateReservation() {
         console.log("Cancel Clicked!", e.target);
     };
 
-    async function handleSubmit(event) {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const ac = new AbortController();
         try {
-            await createReservations(formData, ac.signal)
-            history.push(`/dashboard`)
+            setReservationsError(null);
+            const response = await createReservations({...formData, people: Number(formData.people)});
+            const date = response.reservation_date;
+            history.push(`/dashboard?date=${date}`)
         } catch (error) {
+            setReservationsError(error);
             console.log(error);
+        };
         }
-        return () => ac.abort();
-    };
 
 
 
@@ -50,6 +54,7 @@ function CreateReservation() {
     return (
         <div>
             <h1>Create Reservation</h1>
+            <ErrorAlert error={reservationsError} />
             <form onSubmit={handleSubmit}>
                 <div className="row">
                     <div className="col">
@@ -85,7 +90,7 @@ function CreateReservation() {
                             name="mobile_number"
                             className="form-control"
                             placeholder="Please Enter 10 Digit Number"
-                            aria-label="Phone NUmber"
+                            aria-label="Phone Number"
                             required={true}
                             onChange={changeHandler}
                             value={formData.mobile_number}
@@ -135,7 +140,7 @@ function CreateReservation() {
                 </div>
                 <div className="row justify-content-between px-2">
                     <div className="pr-1">
-                        <button onClick={handleSubmit} type="submit" className="btn btn-primary">
+                        <button type="submit" className="btn btn-primary">
                             Submit
                         </button>
                     </div>
