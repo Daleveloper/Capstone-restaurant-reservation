@@ -66,13 +66,13 @@ async function validateReservationId(request, response, next) {
     next();
 }
 async function validateSeat(request, response, next) {
-    if (response.locals.table.status === "occupied") {
+    if (response.locals.table.table_status === "occupied") {
         return next({
             status: 400,
             message: "the table you selected is currently occupied",
         });
     }
-    if (response.locals.reservation.status === "seated") {
+    if (response.locals.reservation.table_status === "seated") {
         return next({
             status: 400,
             message: "the reservation you selected is already seated",
@@ -118,7 +118,7 @@ async function update(request, response) {
         response.locals.reservation.reservation_id,
         "seated"
     );
-    response.status(200).json({ data: { status: "seated" } });
+    response.status(200).json({ data: { table_status: "seated" } });
 }
 
 

@@ -43,13 +43,13 @@ function readReservation(reservation_id) {
 function occupy(table_id, reservation_id) {
     return knex(tableName)
         .where({ table_id: table_id })
-        .update({ reservation_id: reservation_id, status: "occupied" });
+        .update({ reservation_id: reservation_id, table_status: "occupied" });
 }
 
 function free(table_id) {
     return knex(tableName)
         .where({ table_id: table_id })
-        .update({ reservation_id: null, status: "free" });
+        .update({ reservation_id: null, table_status: "free" });
 }
 
 module.exports = {
