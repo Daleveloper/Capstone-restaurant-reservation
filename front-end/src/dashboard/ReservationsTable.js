@@ -1,7 +1,6 @@
 import React from "react";
 
 export default function ReservationsTable({ reservations }) {
-    console.log(reservations)
     const reservationsTableRow = reservations.map((reservation) => {
         return (
             <tr key={reservation.reservation_id}>

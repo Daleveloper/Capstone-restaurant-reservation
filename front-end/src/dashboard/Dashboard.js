@@ -4,6 +4,7 @@ import ErrorAlert from "../layout/ErrorAlert";
 import { previous, next, today } from "../utils/date-time";
 import { useHistory } from "react-router-dom";
 import ReservationsTable from "./ReservationsTable";
+import TableRow from "./TableRow";
 
 
 /**
@@ -12,7 +13,10 @@ import ReservationsTable from "./ReservationsTable";
  *  the date for which the user wants to view reservations.
  * @returns {JSX.Element}
  */
-function Dashboard({ date }) {
+function Dashboard({
+  date,
+  tables,
+}) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
   const history = useHistory();
@@ -27,6 +31,19 @@ function Dashboard({ date }) {
       .catch(setReservationsError);
     return () => abortController.abort();
   }
+
+  const tablesJSX = () => {
+    return tables.map((table) => (
+      <TableRow
+        key={table.table_id}
+        table={table}
+      />
+    ));
+  };
+
+
+
+
 
   function handleToday() {
     history.push(`/dashboard`);
@@ -58,7 +75,23 @@ function Dashboard({ date }) {
 
 
       <ErrorAlert error={reservationsError} />
-      <ReservationsTable reservations={reservations} loadDashboard={loadDashboard}/>
+      <ReservationsTable reservations={reservations} loadDashboard={loadDashboard} />
+      <div>
+        <table className="table table-hover m-1 text-nowrap mb-4">
+          <thead className="thead-dark">
+            <tr className="text-center">
+              <th scope="col">Table ID</th>
+              <th scope="col">Table Name</th>
+              <th scope="col">Capacity</th>
+              <th scope="col">Status</th>
+              <th scope="col">Reservation ID</th>
+              <th scope="col">Finish</th>
+            </tr>
+          </thead>
+          <tbody>{tablesJSX()}</tbody>
+        </table>
+      </div>
+
     </main>
   );
 }

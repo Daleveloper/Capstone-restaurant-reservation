@@ -99,6 +99,20 @@ function isWithinOpenHours(req, res, next) {
   next();
 }
 
+async function validateReservationId(request, response, next) {
+  const { reservation_id } = request.params;
+  const reservation = await service.read(Number(reservation_id));
+  if (!reservation) {
+    return next({
+      status: 404,
+      message: `reservation id ${reservation_id} does not exist`,
+    });
+  }
+  response.locals.reservation = reservation;
+  next();
+}
+
+
 async function list(req, res, next) {
   const { date, currentDate } = req.query;
   if (date) {
@@ -111,6 +125,11 @@ async function list(req, res, next) {
     res.json({ data });
   }
 }
+
+async function read(request, response) {
+  response.status(200).json({ data: response.locals.reservation });
+}
+
 
 async function create(req, res, next) {
   const reservation = req.body.data;
@@ -131,4 +150,5 @@ module.exports = {
     isWithinOpenHours,
     asyncErrorBoundary(create)],
   list: asyncErrorBoundary(list),
+  read: [asyncErrorBoundary(validateReservationId), asyncErrorBoundary(read)],
 };
