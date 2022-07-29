@@ -5,7 +5,7 @@ export default function ReversationList({ reservations, cancelHandler }) {
 
     return (
         <>
-            <table className="table" striped bordered hover>
+            <table className="table" >
                 <thead className="thead">
                     <tr>
                         <th scope="col">Id</th>
