@@ -31,16 +31,17 @@ export default function CreateReservation() {
     };
 
     const submitHandler = (event) => {
+        console.log("submithandler called",)
         event.preventDefault();
         // async function addReservation() {
 
         return createReservations(formData)
             .then((test) => {
-                console.log("submithandler", test)
+                // console.log("submithandler", test)
                 history.push(`/dashboard?date=${formData.reservation_date}`);
             })
             .catch((error) => {
-                console.log(error)
+                // console.log("catch error", error)
                 setReservationsError(error);
             })
         // }
@@ -97,7 +98,7 @@ export default function CreateReservation() {
                                 id="mobile_number"
                                 name="mobile_number"
                                 type="tel"
-                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                                // pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                                 className="form-control"
                                 placeholder="xxx-xxx-xxxx"
                                 required

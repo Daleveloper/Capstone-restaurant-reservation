@@ -71,6 +71,7 @@ function validDateTime(req, res, next) {
   const { data: { reservation_date, reservation_time } = {} } = req.body;
   console.log("validate time", req.body)
   const reservation = new Date(`${reservation_date}T${reservation_time}Z`);
+  console.log("tuesday",reservation)
   const now = new Date();
   const [hour, minute] = reservation_time.split(":");
   if (reservation_date === "not-a-date") {
@@ -85,12 +86,12 @@ function validDateTime(req, res, next) {
       message: `reservation_time is not a valid time.`,
     });
   }
-  // if (reservation.getDay() !== 2) {
-  //   next({
-  //     status: 400,
-  //     message: "The restaurant is closed on Tuesdays.",
-  //   });
-  // }
+  if (reservation.getDay() == 2) {
+    next({
+      status: 400,
+      message: "The restaurant is closed on Tuesdays.",
+    });
+  }
   if (reservation < now) {
     next({
       status: 400,
