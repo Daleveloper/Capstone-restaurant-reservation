@@ -36,35 +36,22 @@ export default function EditReservations() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const abortController = new AbortController();
         async function edit() {
             try {
-                await updateReservation({ data: formData }, abortController.signal);
+                await updateReservation( formData , reservation_id);
                 history.push(`/dashboard?date=${formData.reservation_date}`);
             } catch (error) {
                 setEditError(error);
             }
         }
         edit();
-        return () => abortController.abort();
     };
-
     return (
         <>
             <h1>Edit Reservation</h1>
             <ErrorAlert error={editError} />
-            <ReservationCard changeHandler={changeHandler} formData={formData} />
-            <button className="btn btn-secondary mr-2" onClick={history.goBack}>
-                Cancel
-            </button>
-            <button
-                form="reservationCard"
-                type="submit"
-                className="btn btn-primary"
-                onClick={handleSubmit}
-            >
-                Submit
-            </button>
+            <ReservationCard submitHandler={handleSubmit}changeHandler={changeHandler} formData={formData} />
+
         </>
     );
 }

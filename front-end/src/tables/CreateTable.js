@@ -28,35 +28,22 @@ export default function CreateTable() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        const abortController = new AbortController();
         async function addTable() {
             try {
-                await createTable( formData , abortController.signal);
+                await createTable( formData );
                 history.push(`/dashboard`);
             } catch (error) {
                 setError(error);
             }
         }
         addTable();
-        return () => abortController.abort();
     };
 
     return (
         <div>
             <h1>Create Table</h1>
             <ErrorAlert error={tableError} />
-            <TableCard changeHandler={changeHandler} formData={formData} />
-            <button className="btn btn-secondary mr-2" onClick={history.goBack}>
-                Cancel
-            </button>
-            <button
-                form="tableForm"
-                type="submit"
-                className="btn btn-primary"
-                onClick={handleSubmit}
-            >
-                Submit
-            </button>
+            <TableCard handleSubmit={handleSubmit} changeHandler={changeHandler} formData={formData} />
         </div>
     );
 }

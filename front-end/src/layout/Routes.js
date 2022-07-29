@@ -8,6 +8,7 @@ import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
 import useQuery from "../utils/useQuery";
 import EditReservation from "../Reservations/EditReservation";
+import Search from "../Search/Search";
 
 
 /**
@@ -39,6 +40,9 @@ function Routes() {
       </Route>
       <Route path="/tables/new">
         <CreateTable />
+      </Route>
+      <Route path="/search">
+        <Search />
       </Route>
       <Route exact={true} path="/reservations">
         <Redirect to={"/dashboard"} />

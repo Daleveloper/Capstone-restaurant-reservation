@@ -32,14 +32,12 @@ headers.append("Content-Type", "application/json");
 async function fetchJson(url, options, onCancel) {
   try {
     const response = await fetch(url, options);
-    console.log(response)
 
     if (response.status === 204) {
       return null;
     }
 
     const payload = await response.json();
-    console.log(payload)
     if (payload.error) {
       return Promise.reject({ message: payload.error });
     }
@@ -64,7 +62,6 @@ export async function listReservations(params, signal) {
   Object.entries(params).forEach(([key, value]) =>
     url.searchParams.append(key, value.toString())
   );
-  console.log(url)
   return await fetchJson(url, { headers, signal }, [])
     .then(formatReservationDate)
     .then(formatReservationTime);
@@ -90,14 +87,14 @@ export async function finishReservation(table_id, signal) {
   };
   return await fetchJson(url, options, {});
 }
-export async function updateReservation(data, signal) {
+export async function updateReservation(data, reservation_id, signal) {
   const url = new URL(
-    `${API_BASE_URL}/reservations/${data.data.reservation_id}`
+    `${API_BASE_URL}/reservations/${reservation_id}`
   );
   const options = {
     method: "PUT",
     headers,
-    body: JSON.stringify(data),
+    body: JSON.stringify({data}),
     signal,
   };
   return await fetchJson(url, options, {});

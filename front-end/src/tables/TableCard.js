@@ -1,9 +1,12 @@
 import React from "react";
+import { useHistory } from "react-router-dom";
 
-export default function TableCard({ changeHandler, formData }) {
+export default function TableCard({ handleSubmit, changeHandler, formData }) {
+const history = useHistory();    
+    
     return (
         <>
-            <form id="tableForm">
+            <form id="tableForm" onSubmit={handleSubmit}>
                 <div className="form-row mb-3">
                     <div className="col">
                         <label className="form-label" htmlFor="table_name">
@@ -36,6 +39,15 @@ export default function TableCard({ changeHandler, formData }) {
                             min="1"
                         />
                     </div>
+                    <button className="btn btn-secondary mr-2" onClick={history.goBack}>
+                Cancel
+            </button>
+            <button
+                type="submit"
+                className="btn btn-primary"
+            >
+                Submit
+            </button>
                 </div>
             </form>
         </>

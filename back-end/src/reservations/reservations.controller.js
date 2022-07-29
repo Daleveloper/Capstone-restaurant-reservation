@@ -23,7 +23,6 @@ async function list(req, res, next) {
 
 async function create(req, res) {
   const data = await service.create(req.body.data);
-  console.log(data);
   res.status(201).json({ data });
 }
 
@@ -69,9 +68,7 @@ async function queryInput(req, res, next) {
 
 function validDateTime(req, res, next) {
   const { data: { reservation_date, reservation_time } = {} } = req.body;
-  console.log("validate time", req.body)
   const reservation = new Date(`${reservation_date}T${reservation_time}Z`);
-  console.log("tuesday",reservation)
   const now = new Date();
   const [hour, minute] = reservation_time.split(":");
   if (reservation_date === "not-a-date") {
