@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { listReservations } from "../utils/api";
+import { 
+  listReservations, 
+  listTables,
+  finishReservation,
+  cancelReservation,
+} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import { previous, next, today } from "../utils/date-time";
+import { previous, next,  } from "../utils/date-time";
 import { useHistory } from "react-router-dom";
-import ReservationsTable from "./ReservationsTable";
-import TableRow from "./TableRow";
+import ReservationList from "../Reservations/ReservationList";
+import ListTables from "../tables/ListTable";
+
 
 
 /**
@@ -13,36 +19,56 @@ import TableRow from "./TableRow";
  *  the date for which the user wants to view reservations.
  * @returns {JSX.Element}
  */
-function Dashboard({
-  date,
-  tables,
-}) {
+function Dashboard({ date,}) {
   const [reservations, setReservations] = useState([]);
+  const [tables, setTables] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
+  const [tablesError, setTablesError] = useState(null);
   const history = useHistory();
-
-  useEffect(loadDashboard, [date]);
+  
+  
 
   function loadDashboard() {
     const abortController = new AbortController();
     setReservationsError(null);
+    setTablesError(null);
     listReservations({ date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
+    listTables(abortController.signal).then(setTables).catch(setTablesError);
     return () => abortController.abort();
   }
 
-  const tablesJSX = () => {
-    return tables.map((table) => (
-      <TableRow
-        key={table.table_id}
-        table={table}
-      />
-    ));
+
+
+
+  const finishHandler = (table_id) => {
+    const abortController = new AbortController();
+    async function freeTable() {
+      try {
+        await finishReservation(table_id, abortController.signal);
+      } catch (error) {
+        setTablesError(error);
+      }
+    }
+    freeTable().then(loadDashboard);
+    return () => abortController.abort();
   };
 
+  const cancelHandler = (reservation_id) => {
+    const abortController = new AbortController();
+    async function cancel() {
+      try {
+        await cancelReservation(reservation_id, abortController.signal);
+      } catch (error) {
+        setReservationsError(error);
+      }
+    }
+    cancel().then(loadDashboard);
+    return () => abortController.abort();
+  };
 
-
+  useEffect(loadDashboard, [date]);
 
 
   function handleToday() {
@@ -66,7 +92,7 @@ function Dashboard({
         <h4 className="mb-0">Reservations for {date}</h4>
       </div>
 
-      <div className="btn-group" role="group" aria-label="Basic mixed styles example">
+      <div className="d-md-flex mb-3" role="group" aria-label="Basic mixed styles example">
         <button onClick={handlePrevious} type="button" className="btn btn-info">Previous</button>
         <button onClick={handleToday} type="button" className="btn btn-primary">Today</button>
         <button onClick={handleNext} type="button" className="btn btn-success">Next</button>
@@ -75,22 +101,9 @@ function Dashboard({
 
 
       <ErrorAlert error={reservationsError} />
-      <ReservationsTable reservations={reservations} loadDashboard={loadDashboard} />
-      <div>
-        <table className="table table-hover m-1 text-nowrap mb-4">
-          <thead className="thead-dark">
-            <tr className="text-center">
-              <th scope="col">Table ID</th>
-              <th scope="col">Table Name</th>
-              <th scope="col">Capacity</th>
-              <th scope="col">Status</th>
-              <th scope="col">Reservation ID</th>
-              <th scope="col">Finish</th>
-            </tr>
-          </thead>
-          <tbody>{tablesJSX()}</tbody>
-        </table>
-      </div>
+      <ReservationList reservations={reservations} loadDashboard={loadDashboard} cancelHandler={cancelHandler} />
+      <ErrorAlert error={tablesError} />
+      <ListTables tables={tables} finishHandler={finishHandler} />
 
     </main>
   );

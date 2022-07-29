@@ -1,158 +1,170 @@
 import React, { useState } from "react";
-import { createReservations } from "../utils/api";
-import { Link, useHistory } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
+import { createReservations } from "../utils/api";
+import { useHistory } from "react-router-dom";
+//import ReservationCard from "./ReservationCard";
 
-
-
-
-const initialFormState = {
-    first_name: "",
-    last_name: "",
-    mobile_number: "",
-    reservation_date: "",
-    reservation_time: "",
-    people: 0,
-};
-
-function CreateReservation() {
-    const [reservationsError, setReservationsError] = useState(null);
-    const [formData, setFormData] = useState({ ...initialFormState });
+export default function CreateReservation() {
     const history = useHistory();
 
-    const changeHandler = (event) => {
-        setFormData({ ...formData, [event.target.name]: event.target.value });
+    const initialForm = {
+        first_name: "",
+        last_name: "",
+        mobile_number: "",
+        reservation_date: "",
+        reservation_time: "",
+        people: "",
     };
 
-    const cancelHandler = (e) => {
-        console.log("Cancel Clicked!", e.target);
-    };
+    const [formData, setFormData] = useState({ ...initialForm });
+    const [reservationsError, setReservationsError] = useState(null);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        try {
-            setReservationsError(null);
-            const response = await createReservations({...formData, people: Number(formData.people)});
-            const date = response.reservation_date;
-            history.push(`/dashboard?date=${date}`)
-        } catch (error) {
-            setReservationsError(error);
-            console.log(error);
-        };
+    const changeHandler = ({ target }) => {
+        let value = target.value;
+        if (target.name === "people") {
+            value = Number(value);
         }
+        setFormData({
+            ...formData,
+            [target.name]: value,
+        });
+    };
 
+    const submitHandler = (event) => {
+        event.preventDefault();
+        // async function addReservation() {
 
-
-
-
-
-
-
-
-
+        return createReservations(formData)
+            .then((test) => {
+                console.log("submithandler", test)
+                history.push(`/dashboard?date=${formData.reservation_date}`);
+            })
+            .catch((error) => {
+                console.log(error)
+                setReservationsError(error);
+            })
+        // }
+        // addReservation();
+    };
 
     return (
-        <div>
+        <>
             <h1>Create Reservation</h1>
-            <ErrorAlert error={reservationsError} />
-            <form onSubmit={handleSubmit}>
-                <div className="row">
-                    <div className="col">
-                        <label>First Name</label>
-                        <input
-                            type="text"
-                            name="first_name"
-                            className="form-control"
-                            placeholder="Please Enter First Name"
-                            aria-label="First name"
-                            required={true}
-                            onChange={changeHandler}
-                            value={formData.first_name}
-                        />
+            {/* <ErrorAlert error= {reservationsError} />
+            <ReservationCard  changeHandler={changeHandler} formData={formData} /> */}
+            <>
+                {/* <ErrorAlert error={reservationsError} /> */}
+                {reservationsError && (
+                    <div className=" alert alert-danger m-2">Error: {reservationsError.message}</div>
+                )}
+                <form id="reservationCard" onSubmit={submitHandler}>
+                    <div className="form-row">
+                        <div className="col-md">
+                            <label className="form-label" htmlFor="first_name">
+                                First Name
+                            </label>
+                            <input
+                                id="first_name"
+                                name="first_name"
+                                type="text"
+                                className="form-control"
+                                placeholder="First name"
+                                required
+                                onChange={changeHandler}
+                                value={formData.first_name}
+                            />
+                        </div>
+                        <div className="col-md">
+                            <label className="form-label" htmlFor="last_name">
+                                Last Name
+                            </label>
+                            <input
+                                id="last_name"
+                                name="last_name"
+                                type="text"
+                                className="form-control"
+                                placeholder="Last name"
+                                required
+                                onChange={changeHandler}
+                                value={formData.last_name}
+                            />
+                        </div>
+                        <div className="col-md">
+                            <label className="form-label" htmlFor="mobile_number">
+                                Mobile Number
+                            </label>
+                            <input
+                                id="mobile_number"
+                                name="mobile_number"
+                                type="tel"
+                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                                className="form-control"
+                                placeholder="xxx-xxx-xxxx"
+                                required
+                                onChange={changeHandler}
+                                value={formData.mobile_number}
+                            />
+                        </div>
                     </div>
-                    <div className="col">
-                        <label>Last Name</label>
-                        <input
-                            type="text"
-                            name="last_name"
-                            className="form-control"
-                            placeholder="Please Enter Last name"
-                            aria-label="Last name"
-                            required={true}
-                            onChange={changeHandler}
-                            value={formData.last_name}
-                        />
-                    </div>
-                    <div className="col">
-                        <label>Phone Number</label>
-                        <input
-                            type="text"
-                            name="mobile_number"
-                            className="form-control"
-                            placeholder="Please Enter 10 Digit Number"
-                            aria-label="Phone Number"
-                            required={true}
-                            onChange={changeHandler}
-                            value={formData.mobile_number}
-                        />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col">
-                        <label>Date</label>
-                        <input
-                            type="date"
-                            name="reservation_date"
-                            className="form-control"
-                            placeholder="Date"
-                            aria-label="Date"
-                            required={true}
-                            onChange={changeHandler}
-                            value={formData.reservation_date}
-                        />
-                    </div>
-                    <div className="col">
-                        <label>Time</label>
-                        <input
-                            type="time"
-                            name="reservation_time"
-                            className="form-control"
-                            placeholder="Time"
-                            aria-label="Time"
-                            required={true}
-                            onChange={changeHandler}
-                            value={formData.reservation_time}
-                        />
-                    </div>
-                    <div className="col">
-                        <label>People</label>
-                        <input
-                            type="text"
-                            name="people"
-                            className="form-control"
-                            placeholder="Please Enter Party Size Number"
-                            aria-label="Party Size"
-                            required={true}
-                            onChange={changeHandler}
-                            value={formData.people}
-                        />
-                    </div>
-                </div>
-                <div className="row justify-content-between px-2">
-                    <div className="pr-1">
-                        <button type="submit" className="btn btn-primary">
+                    <div className="form-row mt-3 mb-3">
+                        <div className="col-sm">
+                            <label className="form-label" htmlFor="reservation_date">
+                                Date
+                            </label>
+                            <input
+                                id="reservation_date"
+                                name="reservation_date"
+                                type="date"
+                                className="form-control"
+                                placeholder="mm/dd/yyyy"
+                                required
+                                onChange={changeHandler}
+                                value={formData.reservation_date}
+                            />
+                        </div>
+                        <div className="col-sm">
+                            <label className="form-label" htmlFor="reservation_time">
+                                Time
+                            </label>
+                            <input
+                                id="reservation_time"
+                                name="reservation_time"
+                                type="time"
+                                className="form-control"
+                                required
+                                onChange={changeHandler}
+                                value={formData.reservation_time}
+                            />
+                        </div>
+                        <div className="col-sm">
+                            <label className="form-label" htmlFor="people">
+                                Party Size
+                            </label>
+                            <input
+                                id="people"
+                                name="people"
+                                type="number"
+                                className="form-control"
+                                placeholder="Party size"
+                                required
+                                onChange={changeHandler}
+                                value={formData.people}
+                                min="1"
+                            />
+                        </div>
+                        <button className="btn btn-secondary mr-2" onClick={history.goBack}>
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                        >
                             Submit
                         </button>
                     </div>
-                    <Link to={`/`}>
-                        <button href="#" className="btn btn-danger" onClick={cancelHandler}>
-                            <i className="bi bi-trash pr-1"></i>Cancel
-                        </button>
-                    </Link>
-                </div>
-            </form>
-        </div>
-    );
-}
+                </form>
+            </>
+        </>
 
-export default CreateReservation;
+    )
+};
