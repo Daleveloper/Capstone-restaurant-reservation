@@ -1,134 +1,177 @@
 const service = require("./reservations.service");
-const hasProperties = require("../errors/hasProperties");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+const hasProperties = require("../errors/hasProperties");
 
-const VALID_PROPERTIES = [
+const REQUIRED_PROPERTIES = [
   "first_name",
   "last_name",
   "mobile_number",
   "reservation_date",
   "reservation_time",
   "people",
-];
+]
 
-function hasOnlyValidProperties(req, res, next) {
-  const { data = {} } = req.body;
+const hasRequiredProperties = hasProperties(...REQUIRED_PROPERTIES);
 
-  const invalidFields = Object.keys(data).filter(
-    (field) => !VALID_PROPERTIES.includes(field)
-  );
-
-  if (invalidFields.length) {
-    return next({
-      status: 400,
-      message: `Invalid field(s): ${invalidFields.join(", ")}`,
-    });
-  }
-  next();
-}
-
-const hasRequiredProperties = hasProperties("first_name",
-  "last_name",
-  "mobile_number",
-  "reservation_date",
-  "reservation_time",
-  "people");
-
-function validDate(req, res, next) {
-  const date = req.body.data.reservation_date;
-  const valid = new Date(date) !== "Invalid Date" && !isNaN(new Date(date));
-  if (valid) {
-    return next();
-  }
-  next({ status: 400, message: "reservation_date must be valid date." });
-}
-
-function validTime(req, res, next) {
-  const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
-  const time = req.body.data.reservation_time;
-  const valid = time.match(regex);
-  if (valid) {
-    return next();
-  }
-  next({ status: 400, message: "reservation_time must be valid time." });
-}
-
-function validPeople(req, res, next) {
-  const people = req.body.data.people;
-  console.log(typeof people);
-  if (people < 1 || typeof people !== "number") {
-    return next({ status: 400, message: "Valid people property required" });
-  }
-  return next();
-}
-function isNotOnTuesday(req, res, next) {
-  const { reservation_date } = req.body.data;
-  const [year, month, day] = reservation_date.split("-");
-  const date = new Date(`${month} ${day}, ${year}`);
-  res.locals.date = date;
-  if (date.getDay() === 2) {
-    return next({ status: 400, message: "Location is closed on Tuesdays" });
-  }
-  next();
-}
-
-function isInTheFuture(req, res, next) {
-  const date = res.locals.date;
-  const today = new Date();
-  if (date < today) {
-    return next({ status: 400, message: "Must be a future date" });
-  }
-  next();
-}
-
-function isWithinOpenHours(req, res, next) {
-  const reservation = req.body.data;
-  const [hour, minute] = reservation.reservation_time.split(":");
-  if (hour < 10 || hour > 21) {
-    return next({
-      status: 400,
-      message: "Reservation must be made within business hours",
-    });
-  }
-  if ((hour < 11 && minute < 30) || (hour > 20 && minute > 30)) {
-    return next({
-      status: 400,
-      message: "Reservation must be made within business hours",
-    });
-  }
-  next();
+async function read(req, res, next) {
+  res.json({ data: res.locals.reservation });
 }
 
 async function list(req, res, next) {
-  const { date, currentDate } = req.query;
+  res.json({ data: res.locals.reservations });
+}
+
+async function create(req, res) {
+  const data = await service.create(req.body.data);
+  res.status(201).json({ data });
+}
+
+async function update(req, res, next) {
+  const { reservation_id } = res.locals.reservation;
+  const data = await service.update({ ...req.body.data, reservation_id });
+  res.json({ data: data[0] });
+}
+
+async function changeStatus(req, res, next) {
+  const { reservation_id } = req.params;
+  const data = await service.changeStatus({ ...req.body.data, reservation_id });
+  res.json({ data: data[0] });
+}
+//Validation Middleware
+async function reservationExists(req, res, next) {
+  const { reservation_id } = req.params;
+  const found = await service.read(reservation_id);
+  if (found) {
+    res.locals.reservation = found;
+    return next();
+  } else
+    next({
+      status: 404,
+      message: `Reservation ${reservation_id} does not exist.`,
+    });
+}
+
+async function queryInput(req, res, next) {
+  const { date, mobile_number } = req.query;
   if (date) {
-    const data = await service.listByDate(date);
-    res.json({ data });
-  } else if (currentDate) {
-    const data = await service.listByDate(currentDate);
+    res.locals.reservations = await service.list(date);
+    next();
+  } else if (mobile_number) {
+    res.locals.reservations = await service.search(mobile_number);
+    next();
+  } else
+    next({
+      status: 400,
+      message: `No query was specified in the URL`,
+    });
+}
+
+function validDateTime(req, res, next) {
+  const { data: { reservation_date, reservation_time } = {} } = req.body;
+  const reservation = new Date(`${reservation_date}T${reservation_time}Z`);
+  const now = new Date();
+  const [hour, minute] = reservation_time.split(":");
+  if (reservation_date === "not-a-date") {
+    next({
+      status: 400,
+      message: `reservation_date is not a valid date.`,
+    });
+  }
+  if (reservation_time === "not-a-time") {
+    next({
+      status: 400,
+      message: `reservation_time is not a valid time.`,
+    });
+  }
+  if (reservation.getDay() == 2) {
+    next({
+      status: 400,
+      message: "The restaurant is closed on Tuesdays.",
+    });
+  }
+  if (reservation < now) {
+    next({
+      status: 400,
+      message: "Reservation must be made at a future date/time.",
+    });
+  }
+  if (
+    hour < 10 ||
+    hour > 21 ||
+    (hour == 10 && minute < 30) ||
+    (hour == 21 && minute > 30)
+  )
+    next({
+      status: 400,
+      message: `Your reservation time must be between 10:30 AM and 9:30 PM`,
+    });
+  next();
+}
+
+function validPeople(req, res, next) {
+  const { people } = req.body.data;
+  if (people < 1 || typeof people !== "number") {
+    next({
+      status: 400,
+      message: `people must be a number greater than 0.`,
+    });
+  }
+  next();
+}
+
+function validStatus(req, res, next) {
+  const statuses = ["seated", "booked", "finished", "cancelled"];
+  const { status } = req.body.data;
+  if (statuses.includes(status)) next();
+  else
+    next({
+      status: 400,
+      message: `The status cannot be ${status}, and must be "seated", "booked", "finished", or "cancelled".`,
+    });
+}
+
+function isFinished(req, res, next) {
+  if (res.locals.reservation.status !== "finished") {
+    next();
   } else {
-    const data = await service.list();
-    res.json({ data });
+    next({
+      status: 400,
+      message: "Reservation is already finished.",
+    });
   }
 }
 
-async function create(req, res, next) {
-  const reservation = req.body.data;
-  const { reservation_id } = await service.create(reservation);
-  reservation.reservation_id = reservation_id;
-  res.status(201).json({ data: reservation });
+function resBooked(req, res, next) {
+  const { status } = req.body.data;
+  if (!status || status === "booked") next();
+  else
+    next({
+      status: 400,
+      message: `New reservations cannot be '${status}', only 'booked'.`,
+    });
 }
 
-
 module.exports = {
-  create: [hasOnlyValidProperties,
+  list: [asyncErrorBoundary(queryInput), asyncErrorBoundary(list)],
+  create: [
     hasRequiredProperties,
-    validDate,
-    validTime,
+    validDateTime,
     validPeople,
-    isNotOnTuesday,
-    isInTheFuture,
-    isWithinOpenHours,
-    asyncErrorBoundary(create)],
-  list: asyncErrorBoundary(list),
+    resBooked,
+    asyncErrorBoundary(create),
+  ],
+  read: [asyncErrorBoundary(reservationExists), asyncErrorBoundary(read)],
+  update: [
+    hasRequiredProperties,
+    validDateTime,
+    validPeople,
+    asyncErrorBoundary(reservationExists),
+    asyncErrorBoundary(update),
+  ],
+  changeStatus: [
+    asyncErrorBoundary(reservationExists),
+    validStatus,
+    isFinished,
+    asyncErrorBoundary(changeStatus),
+  ],
 };

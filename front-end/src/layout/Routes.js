@@ -1,10 +1,14 @@
 import React from "react";
-import useQuery from "../utils/useQuery";
 import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
+import CreateReservation from "../Reservations/CreateReservation";
+import SeatReservation from "../Reservations/SeatReservation";
+import CreateTable from "../tables/CreateTable";
 import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
-import CreateReservation from "../Reservations/CreateReservation"
+import useQuery from "../utils/useQuery";
+import EditReservation from "../Reservations/EditReservation";
+import Search from "../Search/Search";
 
 
 /**
@@ -18,22 +22,35 @@ function Routes() {
 
   const query = useQuery();
   const date = query.get("date")
-  console.log(date)
+ 
 
   return (
     <Switch>
       <Route exact={true} path="/">
         <Redirect to={"/dashboard"} />
       </Route>
-      <Route exact={true} path="/reservations">
-        <Redirect to={"/dashboard"} />
+      <Route path="/reservations/:reservation_id/edit">
+        <EditReservation />
       </Route>
-      <Route path="/dashboard">
-        <Dashboard date={!date ? today() : date} />
+      <Route path="/reservations/:reservation_id/seat">
+        <SeatReservation />
       </Route>
       <Route path="/reservations/new">
         <CreateReservation />
       </Route>
+      <Route path="/tables/new">
+        <CreateTable />
+      </Route>
+      <Route path="/search">
+        <Search />
+      </Route>
+      <Route exact={true} path="/reservations">
+        <Redirect to={"/dashboard"} />
+      </Route>
+      <Route path="/dashboard">
+        <Dashboard date={date ? date : today()} />
+      </Route>
+      
       <Route>
         <NotFound />
       </Route>
