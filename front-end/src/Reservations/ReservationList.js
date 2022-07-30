@@ -5,7 +5,8 @@ export default function ReversationList({ reservations, cancelHandler }) {
 
     return (
         <>
-            <table className="table" >
+            
+            {/* <table className="table" >
                 <thead className="thead">
                     <tr>
                         <th scope="col">Id</th>
@@ -18,71 +19,88 @@ export default function ReversationList({ reservations, cancelHandler }) {
                         <th scope="col">Status:</th>
                         <th scope="col">Actions:</th>
                     </tr>
-                </thead>
-                <tbody>
+                </thead> */}
+                <div>
                     {reservations.length !== 0 ? (
                         reservations.map((reservation, index) => (
-                            <tr key={index}>
-                                <th scope="row">{reservation.reservation_id}</th>
-                                {path.includes("search") && (
-                                    <td>{reservation.reservation_date}</td>
-                                )}
-                                <td>{reservation.reservation_time}</td>
-                                <td>{reservation.first_name}</td>
-                                <td>{reservation.last_name}</td>
-                                <td>{reservation.people}</td>
-                                <td>{reservation.mobile_number}</td>
-                                <td data-reservation-id-status={reservation.reservation_id}>
-                                    {reservation.status}
-                                </td>
-                                <td>
-                                    {reservation.status !== "seated" &&
-                                        reservation.status !== "finished" &&
-                                        reservation.status !== "cancelled" && (
-                                            <a
-                                                style={{ width: 70 }}
-                                                className="btn btn-success"
-                                                href={`/reservations/${reservation.reservation_id}/seat`}
-                                                role="button"
-                                            >
-                                                Seat
-                                            </a>
-                                        )}
-                                    {reservation.status === "booked" && (
-                                        <a
-                                            style={{ width: 70 }}
-                                            className="btn btn-secondary"
-                                            href={`/reservations/${reservation.reservation_id}/edit`}
-                                            role="button"
-                                        >
-                                            Edit
-                                        </a>
-                                    )}
-                                    {reservation.status === "booked" && (
-                                        <button
-                                            type="button"
-                                            style={{ width: 70 }}
-                                            className="btn btn-danger"
-                                            data-reservation-id-cancel={reservation.reservation_id}
-                                            onClick={() => {
-                                                window.confirm(
-                                                    "Do you want to cancel this reservation? This cannot be undone."
-                                                ) && cancelHandler(reservation.reservation_id);
-                                            }}
-                                        >
-                                            Cancel
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
+                            <div className="card text-white m-3 my-4 row-md-2 border-0" key={index}>
+                                <h5 className="card-header">Reservation ID: {reservation.reservation_id}</h5>
+                                <div className="card-body p-4">
+                                    <p className="card-text">
+                                        Name: {reservation.first_name} {reservation.last_name}
+                                    </p>
+                                    <p className="card-text">
+                                        People: {reservation.people}
+                                    </p>
+                                    <p className="card-text">
+                                        Mobile Number: {reservation.mobile_number}
+                                    </p>
+                                    <p className="card-text">
+                                        Date/Time: {reservation.reservation_date.slice(0, 10)} / {reservation.reservation_time.slice(0, 10)}
+                                    </p>
+                                    <p className="card-text-status"  data-reservation-id-status={reservation.reservation_id}>
+                                        Status: {reservation.status}
+                                    </p>
+                                </div>
+
+                                <div className=" dark-bg container px-1 pb-3 pe-3">
+                                    <div className="row dark-bg pt-3 mx-2 justify-content-between">
+                                        <div className="col p-0">
+                                            {reservation.status !== "seated" &&
+                                                reservation.status !== "finished" &&
+                                                reservation.status !== "cancelled" && (
+                                                    <a
+                                                        style={{ width: 70 }}
+                                                        className="btn btn-success"
+                                                        href={`/reservations/${reservation.reservation_id}/seat`}
+                                                        role="button"
+                                                    >
+                                                        Seat
+                                                    </a>
+                                            )}
+                                        </div>
+                                        <div className="col-auto p-0">
+                                            {reservation.status === "booked" && (
+                                                <a
+                                                    style={{ width: 70 }}
+                                                    className="btn btn-secondary mx-2"
+                                                    href={`/reservations/${reservation.reservation_id}/edit`}
+                                                    role="button"
+                                                >
+                                                    Edit
+                                                </a>
+                                            )}
+                                            {reservation.status === "booked" && (
+                                                <button
+                                                    type="button"
+                                                    // style={{ width: 70 }}
+                                                    className="btn btn-danger"
+                                                    data-reservation-id-cancel={reservation.reservation_id}
+                                                    onClick={() => {
+                                                        window.confirm(
+                                                            "Do you want to cancel this reservation? This cannot be undone."
+                                                        ) && cancelHandler(reservation.reservation_id);
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="col-auto p-0">
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         ))
                     ) : (
-                        <tr>
-                            <td colSpan="6">No reservations found</td>
-                        </tr>
+                        <div>
+                            <p>No reservations found</p>
+                        </div>
                     )}
-                </tbody>
-            </table>
+                </div>
+            {/* </table> */}
         </>
     );
 }
