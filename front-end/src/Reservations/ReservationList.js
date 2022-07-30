@@ -5,24 +5,12 @@ export default function ReversationList({ reservations, cancelHandler }) {
 
     return (
         <>
-            
-            {/* <table className="table" >
-                <thead className="thead">
-                    <tr>
-                        <th scope="col">Id</th>
-                        {path.includes("search") && <th scope="col">Reservation Date:</th>}
-                        <th scope="col">Reservation Time:</th>
-                        <th scope="col">First Name:</th>
-                        <th scope="col">Last Name:</th>
-                        <th scope="col">Party Size:</th>
-                        <th scope="col">Phone Number:</th>
-                        <th scope="col">Status:</th>
-                        <th scope="col">Actions:</th>
-                    </tr>
-                </thead> */}
+
+            <div className="scroll-container" >
                 <div>
                     {reservations.length !== 0 ? (
                         reservations.map((reservation, index) => (
+
                             <div className="card text-white m-3 my-4 row-md-2 border-0" key={index}>
                                 <h5 className="card-header">Reservation ID: {reservation.reservation_id}</h5>
                                 <div className="card-body p-4">
@@ -38,7 +26,7 @@ export default function ReversationList({ reservations, cancelHandler }) {
                                     <p className="card-text">
                                         Date/Time: {reservation.reservation_date.slice(0, 10)} / {reservation.reservation_time.slice(0, 10)}
                                     </p>
-                                    <p className="card-text-status"  data-reservation-id-status={reservation.reservation_id}>
+                                    <p className="card-text-status" data-reservation-id-status={reservation.reservation_id}>
                                         Status: {reservation.status}
                                     </p>
                                 </div>
@@ -57,7 +45,7 @@ export default function ReversationList({ reservations, cancelHandler }) {
                                                     >
                                                         Seat
                                                     </a>
-                                            )}
+                                                )}
                                         </div>
                                         <div className="col-auto p-0">
                                             {reservation.status === "booked" && (
@@ -87,12 +75,12 @@ export default function ReversationList({ reservations, cancelHandler }) {
                                             )}
                                         </div>
                                         <div className="col-auto p-0">
-                                            
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                         ))
                     ) : (
                         <div>
@@ -100,6 +88,7 @@ export default function ReversationList({ reservations, cancelHandler }) {
                         </div>
                     )}
                 </div>
+            </div>
             {/* </table> */}
         </>
     );

@@ -120,6 +120,15 @@ html {
   color: #fff;
 }
 
+.scroll-container {
+  display: block;
+  max-height: 600px;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  text-align: center;
+  max-width: 600px;
+}
+
 @media all and (min-width: 950px) {
   .logo {
       margin-right: 200px;

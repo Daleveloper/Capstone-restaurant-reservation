@@ -45,11 +45,11 @@ export default function CreateReservation() {
     };
 
     return (
-        <>
+        <div>
             <h1>Create Reservation</h1>
             <ErrorAlert error={reservationsError} />
             <ReservationCard submitHandler={submitHandler}changeHandler={changeHandler} formData={formData} />
-        </>
+        </div>
 
     )
 };
